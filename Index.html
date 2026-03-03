@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Aziru - Alpino</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { background-color: #e5e7eb !important; /* gray-200 */ }
+        .modal-overlay { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
+        
+        /* Carrusel Horizontal */
+        .snap-x {
+            scroll-snap-type: x mandatory;
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .snap-center {
+            scroll-snap-align: center;
+            flex: 0 0 100%;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-gray-800 font-sans" x-data="shopApp()" x-init="init()">
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <h2 class="text-3xl font-black text-gray-900 mb-4 text-center uppercase tracking-widest">Colección Team Alpino</h2>
+        
+        <!-- INICIO: Filtros -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-12">
+            <button @click="selectedCategory = 'Todos'"
+                    :class="{ 'bg-gray-900 text-white': selectedCategory === 'Todos', 'bg-white text-gray-600 hover:bg-gray-100': selectedCategory !== 'Todos' }"
+                    class="px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm">
+                Todos
+            </button>
+            <template x-for="category in categories" :key="category">
+                <button @click="selectedCategory = category"
+                        :class="{ 'bg-gray-900 text-white': selectedCategory === category, 'bg-white text-gray-600 hover:bg-gray-100': selectedCategory !== category }"
+                        class="px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm">
+                    <span x-text="category + 's'"></span>
+                </button>
+            </template>
+        </div>
+        <!-- FIN: Filtros -->
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <template x-for="product in products.filter(p => selectedCategory === 'Todos' || p.name.includes(selectedCategory))" :key="product.id">
+                <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 flex flex-col h-full overflow-hidden group p-3">
+                    <div class="h-60 bg-white overflow-hidden cursor-pointer relative" @click="openProduct(product)">
+                        <img :src="product.image" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-700">
+                    </div>
+                    <div class="pt-6 flex flex-col flex-grow bg-white">
+                        <div class="mb-4 px-3">
+                            <h3 class="text-xl font-extrabold text-gray-900 leading-tight mb-1" x-text="product.name"></h3>
+                            <span class="text-indigo-600 font-black text-lg" x-text="product.price"></span>
+                        </div>
+                        <div class="mt-auto space-y-3">
+                            <button @click="openProduct(product)" class="w-full py-3 text-xs font-bold text-gray-400 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all tracking-widest">
+                                DETALLES TÉCNICOS
+                            </button>
+                            <a :href="'https://wa.me/573203208173?text=Hola! Me interesa: ' + product.name" target="_blank" class="flex items-center justify-center w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-lg active:scale-95">
+                                COMPRAR AHORA
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div x-show="unavailableProducts.filter(p => selectedCategory === 'Todos' || p.name.includes(selectedCategory)).length > 0" class="mt-20">
+            <h2 class="text-2xl font-bold text-gray-600 mb-8 text-center uppercase tracking-widest">Colecciones Anteriores</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <template x-for="product in unavailableProducts.filter(p => selectedCategory === 'Todos' || p.name.includes(selectedCategory))" :key="product.id">
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden group p-3">
+                        <div class="h-60 bg-white overflow-hidden relative">
+                             <div class="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center">
+                                <span class="text-sm font-bold text-gray-500 bg-gray-200 px-4 py-2 rounded-full">NO DISPONIBLE</span>
+                            </div>
+                            <img :src="product.image" class="w-full h-full object-contain opacity-60">
+                        </div>
+                        <div class="pt-6 flex flex-col flex-grow bg-white">
+                            <div class="mb-4 px-3">
+                                <h3 class="text-xl font-extrabold text-gray-500 leading-tight mb-1" x-text="product.name"></h3>
+                                <span class="text-gray-400 font-black text-lg" x-text="product.price"></span>
+                            </div>
+                            <div class="mt-auto space-y-3">
+                                <button @click="openProduct(product)" class="w-full py-3 text-xs font-bold text-gray-400 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all tracking-widest">
+                                    VER DETALLES
+                                </button>
+                                <button disabled class="flex items-center justify-center w-full py-4 bg-gray-300 text-gray-500 rounded-2xl font-bold cursor-not-allowed">
+                                    NO DISPONIBLE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 modal-overlay" @click="isModalOpen = false"></div>
+        <div x-show="isModalOpen" x-transition.scale.95 class="relative bg-white rounded-[2.5rem] overflow-hidden shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+            <button @click="isModalOpen = false" class="absolute top-5 right-5 z-20 bg-white/80 backdrop-blur-md text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-white transition-colors">✕</button>
+            <div class="overflow-y-auto no-scrollbar">
+                <div class="relative bg-white pt-10 pb-4">
+                    <div class="snap-x no-scrollbar h-80">
+                        <div class="snap-center h-full p-6">
+                            <img :src="selectedProduct.image" class="w-full h-full object-contain">
+                        </div>
+                        <template x-if="selectedProduct.image2">
+                            <div class="snap-center h-full p-6">
+                                <img :src="selectedProduct.image2" class="w-full h-full object-contain">
+                            </div>
+                        </template>
+                    </div>
+                    <template x-if="selectedProduct.image2">
+                        <div class="text-center mt-2">
+                            <span class="text-[10px] font-bold text-gray-300 tracking-[0.3em] uppercase">Desliza para ver más</span>
+                        </div>
+                    </template>
+                </div>
+                <div class="p-8 pt-2">
+                    <div class="mb-6">
+                        <h3 class="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-2" x-text="selectedProduct.name"></h3>
+                        <div class="text-2xl font-black text-indigo-600" :class="{ 'text-gray-400': !selectedProduct.available }" x-text="selectedProduct.price"></div>
+                    </div>
+                    <template x-if="selectedProduct.isLycra && selectedProduct.available">
+                        <div class="grid grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-2xl">
+                            <div>
+                                <label for="seam-type" class="block text-xs font-bold text-gray-500 mb-1">TIPO DE BADANA</label>
+                                <select id="seam-type" x-model="selectedSeamType" @change="updateLycraPrice()" class="w-full p-2 border-gray-300 rounded-lg text-sm font-semibold">
+                                    <option value="con-costuras">Con Costuras</option>
+                                    <option value="sin-costuras">Sin Costuras</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="hours" class="block text-xs font-bold text-gray-500 mb-1">DURACIÓN</label>
+                                <select id="hours" x-model="selectedHours" @change="updateLycraPrice()" class="w-full p-2 border-gray-300 rounded-lg text-sm font-semibold">
+                                    <template x-for="h in Object.keys(lycraPrices[selectedSeamType])">
+                                        <option :value="h" x-text="h + ' horas'"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                    </template>
+                    <div class="space-y-2 mb-8">
+                        <template x-for="line in selectedProduct.features">
+                            <div class="flex items-start text-gray-600">
+                                <span class="mr-2 text-indigo-400 font-bold">-</span>
+                                <span class="text-sm font-medium leading-relaxed" x-text="line"></span>
+                            </div>
+                        </template>
+                    </div>
+                    <a :href="'https://wa.me/573203208173?text=Hola! Me interesa: ' + selectedProduct.name" target="_blank" x-show="selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-[#25D366] text-white rounded-[1.5rem] font-bold text-lg hover:bg-[#128C7E] shadow-xl transition-all active:scale-95 mb-4">
+                        Consultar Disponibilidad
+                    </a>
+                    <button disabled x-show="!selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-gray-300 text-gray-500 rounded-[1.5rem] font-bold text-lg cursor-not-allowed mb-4">
+                        No Disponible
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.shopApp = function() {
+            return {
+                isModalOpen: false,
+                selectedProduct: {},
+                products: [],
+                unavailableProducts: [],
+                categories: ['Jersey', 'Chaqueta', 'Chaleco', 'Licra', 'Cuellero'],
+                selectedCategory: 'Todos',
+
+                lycraPrices: {
+                    'con-costuras': { '4': 132000, '6': 154000, '8': 176000, '10+': 198000 },
+                    'sin-costuras': { '6': 209000, '8': 231000, '10+': 253000 }
+                },
+                selectedSeamType: 'con-costuras',
+                selectedHours: '4',
+
+                allProducts: [
+                    // --- Productos Disponibles (Ordenados por ID para fácil edición) ---
+                    // El 'sortOrder' define la posición en la página. Un número más bajo aparece primero.
+                    { id: 1, name: "Chaqueta Alpino Negra 2025", price: "$124.000", available: true, sortOrder: 20, image: "assets/images/Chaqueta Alpino Negra_2025.webp", image2: "assets/images/Chaqueta Alpino Negra atras_2025.webp", features: ["Tela rompevientos de alta gama", "Repelencia al agua certificada", "Detalles reflectivos traseros", "Cremallera con protección de barbilla", "Corte ajustado profesional"] },
+                    { id: 2, name: "Chaleco Alpino Negro 2025", price: "$95.000", available: true, sortOrder: 30, image: "assets/images/Chaleco Alpino Negro 2025 (Frente).webp", image2: "assets/images/Chaleco Alpino Negro 2025 (Atras).webp", features: ["Diseño ultraligero y compacto", "Protección contra el viento", "Espalda en malla para máxima ventilación", "Bolsillo trasero con cremallera", "Ideal para cambios de clima"] },
+                    { id: 3, name: "Jersey Alpino Azul 2025 (Manga Corta)", price: "$112.000", available: true, sortOrder: 10, image: "assets/images/Jersey Alpino 2025_Azul (Frente) Manga Corta.webp", image2: "assets/images/Jersey Alpino 2025_Azul (espalda) Manga Corta.webp", features: ["Tejido de microfibra con secado rápido", "Protección solar UV 30+", "Corte ajustado para aerodinámica", "Banda de silicona en la cintura", "Tres bolsillos traseros"] },
+                    { id: 4, name: "Jersey Alpino Negro 2025 (Manga Corta)", price: "$112.000", available: true, sortOrder: 11, image: "assets/images/Jersey Alpino 2025_Negro (Frente) Manga Corta.webp", image2: "assets/images/Jersey Alpino 2025_Negro (espalda) Manga Corta.webp", features: ["Tejido de microfibra con secado rápido", "Protección solar UV 30+", "Corte ajustado para aerodinámica", "Banda de silicona en la cintura", "Tres bolsillos traseros"] },
+                    { id: 5, name: "Jersey Azul 2025 (Manga Larga)", price: "$112.000", available: true, sortOrder: 12, image: "assets/images/Jersey Azul (Frente) Manga Larga_2025.webp", image2: "assets/images/Jersey Azul (Espalda) Manga Larga_2025.webp", features: ["Protección solar UV 50+", "Secado ultra rápido", "Tres bolsillos traseros reforzados", "Laterales en malla transpirable", "Ideal para rutas de largo aliento"] },
+                    { id: 6, name: "Jersey Negro 2025 (Manga Larga)", price: "$112.000", available: true, sortOrder: 13, image: "assets/images/Jersey Negro (Frente) Manga Larga_2025.webp", image2: "assets/images/Jersey Negro (Espalda) Manga Larga_2025.webp", features: ["Protección solar UV 50+", "Secado ultra rápido", "Tres bolsillos traseros reforzados", "Laterales en malla transpirable", "Ideal para rutas de largo aliento"] },
+                    { id: 7, name: "Jersey MTB Azul 2025", price: "$95.000", available: true, sortOrder: 14, image: "assets/images/Jersey MTB 2025 Azul (frente).webp", image2: "assets/images/Jersey MTB 2025 Azul (Espalda).webp", features: ["Corte holgado para mayor comodidad", "Tejido resistente a la abrasión", "Alta transpirabilidad", "Bolsillo lateral con cremallera", "Diseño específico para MTB"] },
+                    { id: 8, name: "Jersey MTB Negro 2025", price: "$95.000", available: true, sortOrder: 15, image: "assets/images/Jersey MTB 2025 Negro (frente).webp", image2: "assets/images/Jersey MTB 2025 Negro (Espalda).webp", features: ["Corte holgado para mayor comodidad", "Tejido resistente a la abrasión", "Alta transpirabilidad", "Bolsillo lateral con cremallera", "Diseño específico para MTB"] },
+                    { id: 9, name: "Licra Alpino 2025", price: "$132.000", available: true, isLycra: true, sortOrder: 40, image: "assets/images/Licra alpino 2025 frente.webp", image2: "assets/images/Licra alpino 2025 espalda.webp", features: ["Badana de alta densidad para largas distancias", "Tejido de compresión que mejora el rendimiento", "Tirantes sin costuras para mayor confort", "Paneles reflectantes para visibilidad", "Ajuste ergonómico"] },
+                    { id: 10, name: "Cuellero Alpino 2025", price: "$16.000", available: true, sortOrder: 50, image: "assets/images/cuellero alpino 2025.webp", image2: null, features: ["Multifuncional: úsalo como quieras", "Tejido suave y elástico", "Protección contra el viento y el frío", "Transpirable y de secado rápido", "Diseño exclusivo Alpino"] },
+                    { id: 14, name: "Cuellero Azul", price: "$16.000", available: true, sortOrder: 51, image: "assets/images/Cuellero Azul.webp", image2: null, features: ["Tejido suave y confortable", "Protección ligera para el cuello", "Versátil y fácil de llevar", "Ideal para el día a día", "Color sólido y combinable"] },
+                    { id: 15, name: "Cuellero Reto las Civilizaciones", price: "$16.000", available: true, sortOrder: 1, image: "assets/images/cuellero 2026.webp", image2: null, features: ["Tejido suave y confortable", "Protección ligera para el cuello", "Versátil y fácil de llevar", "Ideal para el día a día", "Color sólido y combinable"] },
+                    { id: 16, name: "Jersey Tricolor 2026", price: "$112.000", available: true, sortOrder: 2, image: "assets/images/TRICOLOR 2026 FRENTE.webp", image2: "assets/images/TRICOLOR 2026 ESPALDA.webp", features: ["Diseño conmemorativo", "Tejidos de última generación", "Ajuste de competición", "Detalles exclusivos de la colección", "Representa los colores de la bandera"] },
+                    
+
+                    // --- Productos No Disponibles (Ordenados por ID para fácil edición) ---
+                    { id: 11, name: "Jersey Azul Manga Larga", price: "$112.000", available: false, image: "assets/images/Jersey Alpino Azul (Frente) Manga Larga.webp", image2: "assets/images/Jersey Alpino Azul (Espalda) Manga Larga.webp", features: ["Protección solar UV 50+", "Secado ultra rápido", "Tres bolsillos traseros reforzados", "Laterales en malla transpirable", "Ideal para rutas de largo aliento"] },
+                    { id: 12, name: "Jersey Negro Manga Larga", price: "$112.000", available: false, image: "assets/images/Jersey Alpino Negro (Frente) Manga Larga.webp", image2: "assets/images/Jersey Alpino Negro (Espalda) Manga Corta.webp", features: ["Protección solar UV 50+", "Secado ultra rápido", "Tres bolsillos traseros reforzados", "Laterales en malla transpirable", "Ideal para rutas de largo aliento"] },
+                    { id: 13, name: "Licra Negra Alpino", price: "$132.000", available: false, isLycra: true, image: "assets/images/Licra Negra - Frente.webp", image2: "assets/images/Licra Negra - Atras.webp", features: ["Badana de gel italiana", "Compresión muscular activa", "Costuras planas anti-roce", "Bandas elásticas de silicona", "Resistencia de hasta 7 horas en sillín"] }
+                ],
+
+                init() {
+                    const available = this.allProducts.filter(p => p.available);
+                    const unavailable = this.allProducts.filter(p => !p.available);
+
+                    unavailable.forEach(p => p.price = 'No Disponible');
+
+                    // Ordena los productos disponibles usando la nueva propiedad 'sortOrder'
+                    available.sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
+
+                    this.products = available;
+                    this.unavailableProducts = unavailable;
+                },
+
+                formatPrice(value) {
+                    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+                },
+
+                updateLycraPrice() {
+                    if (this.selectedSeamType === 'sin-costuras' && this.selectedHours === '4') {
+                        this.selectedHours = '6';
+                    }
+                    const price = this.lycraPrices[this.selectedSeamType][this.selectedHours];
+                    this.selectedProduct.price = this.formatPrice(price);
+                },
+
+                openProduct(product) {
+                    this.selectedProduct = JSON.parse(JSON.stringify(product));
+                    if (this.selectedProduct.isLycra && this.selectedProduct.available) {
+                        this.selectedSeamType = 'con-costuras';
+                        this.selectedHours = '4';
+                        this.updateLycraPrice();
+                    }
+                    this.isModalOpen = true;
+                }
+            }
+        };
+    </script>
+</body>
+</html>
