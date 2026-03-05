@@ -9,6 +9,7 @@
     <style>
         [x-cloak] { display: none !important; }
         body { background-color: #e5e7eb !important; /* gray-200 */ }
+        .cursor-zoom-in { cursor: zoom-in; }
         .modal-overlay { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
         
         /* Carrusel Horizontal */
@@ -114,12 +115,21 @@
         <div x-show="selectedCategory === 'Guía de Tallas'" class="mt-20">
             <h2 class="text-2xl font-bold text-gray-600 mb-8 text-center uppercase tracking-widest">Guía de Tallas</h2>
             <div class="relative h-80 bg-white rounded-3xl shadow-sm p-4">
-                <img :src="sizeGuideImages[currentSizeGuideIndex].src" :alt="sizeGuideImages[currentSizeGuideIndex].alt" class="w-full h-full object-contain">
+                <img :src="sizeGuideImages[currentSizeGuideIndex].src" 
+                     :alt="sizeGuideImages[currentSizeGuideIndex].alt" 
+                     @click="openSizeGuideModal(sizeGuideImages[currentSizeGuideIndex].src)"
+                     class="w-full h-full object-contain cursor-zoom-in">
                 <button @click="prevSizeGuide()" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white text-gray-800 font-bold">‹</button>
                 <button @click="nextSizeGuide()" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white text-gray-800 font-bold">›</button>
             </div>
         </div>
 
+    <div x-show="isSizeGuideModalOpen" x-cloak class="fixed inset-0 z-[101] flex items-center justify-center p-4">
+        <div x-show="isSizeGuideModalOpen" x-transition.opacity class="fixed inset-0 modal-overlay" @click="isSizeGuideModalOpen = false"></div>
+        <div x-show="isSizeGuideModalOpen" x-transition.scale.95 class="relative max-w-4xl w-full max-h-[90vh]" @click="isSizeGuideModalOpen = false">
+            <img :src="zoomedImageSrc" alt="Guía de Tallas Ampliada" class="w-auto h-auto max-w-full max-h-[90vh] rounded-lg shadow-2xl">
+        </div>
+    </div>
     <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 modal-overlay" @click="isModalOpen = false"></div>
         <div x-show="isModalOpen" x-transition.scale.95 class="relative bg-white rounded-[2.5rem] overflow-hidden shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
@@ -189,6 +199,8 @@
         window.shopApp = function() {
             return {
                 isModalOpen: false,
+                isSizeGuideModalOpen: false,
+                zoomedImageSrc: '',
                 selectedProduct: {},
                 products: [],
                 unavailableProducts: [],
@@ -203,9 +215,10 @@
                 selectedHours: '4',
                 whatsappMessage: '',
                 sizeGuideImages: [
-                    { src: 'assets/images/Tabla medidas buso enduro.jpeg', alt: 'Tabla medidas buso enduro' },
+                    { src: 'assets/images/Tallas girls.jpeg', alt: 'Tabla medidas Licra' },
                     { src: 'assets/images/Tabla medidas Jersey.jpeg', alt: 'Tabla medidas Jersey' },
-                    { src: 'assets/images/Tabla medidas Licra.jpeg', alt: 'Tabla medidas Licra' }
+                    { src: 'assets/images/Tabla medidas Licra.jpeg', alt: 'Tabla medidas Licra' },
+                    { src: 'assets/images/Tabla medidas buso enduro.jpeg', alt: 'Tabla medidas buso enduro' },                  
                 ],
                 currentSizeGuideIndex: 0,
                 
@@ -266,6 +279,11 @@
                     }
                     this.updateLycraPrice(); // Llama para establecer precio inicial y mensaje
                     this.isModalOpen = true;
+                }
+                ,
+                openSizeGuideModal(src) {
+                    this.zoomedImageSrc = src;
+                    this.isSizeGuideModalOpen = true;
                 }
             }
         };
