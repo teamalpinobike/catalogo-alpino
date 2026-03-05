@@ -157,7 +157,7 @@
                             </div>
                         </template>
                     </div>
-                    <a :href="'https://wa.me/573203208173?text=Hola! Me interesa: ' + selectedProduct.name" target="_blank" x-show="selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-[#25D366] text-white rounded-[1.5rem] font-bold text-lg hover:bg-[#128C7E] shadow-xl transition-all active:scale-95 mb-4">
+                    <a :href="'https://wa.me/573203208173?text=' + encodeURIComponent(whatsappMessage)" target="_blank" x-show="selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-[#25D366] text-white rounded-[1.5rem] font-bold text-lg hover:bg-[#128C7E] shadow-xl transition-all active:scale-95 mb-4">
                         Consultar Disponibilidad
                     </a>
                     <button disabled x-show="!selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-gray-300 text-gray-500 rounded-[1.5rem] font-bold text-lg cursor-not-allowed mb-4">
@@ -184,6 +184,7 @@
                 },
                 selectedSeamType: 'con-costuras',
                 selectedHours: '4',
+                whatsappMessage: '',
 
                 allProducts: [
                     // --- Productos Disponibles (Ordenados por ID para fácil edición) ---
@@ -198,6 +199,7 @@
                     { id: 8, name: "Jersey MTB Negro 2025", price: "$95.000", available: true, sortOrder: 15, image: "assets/images/Jersey MTB 2025 Negro (frente).webp", image2: "assets/images/Jersey MTB 2025 Negro (Espalda).webp", features: ["Corte holgado para mayor comodidad", "Tejido resistente a la abrasión", "Alta transpirabilidad", "Bolsillo lateral con cremallera", "Diseño específico para MTB"] },
                     { id: 9, name: "Licra Alpino 2025", price: "$132.000", available: true, isLycra: true, sortOrder: 40, image: "assets/images/Licra alpino 2025 frente.webp", image2: "assets/images/Licra alpino 2025 espalda.webp", features: ["Badana de alta densidad para largas distancias", "Tejido de compresión que mejora el rendimiento", "Tirantes sin costuras para mayor confort", "Paneles reflectantes para visibilidad", "Ajuste ergonómico"] },
                     { id: 10, name: "Cuellero Alpino 2025", price: "$16.000", available: true, sortOrder: 50, image: "assets/images/cuellero alpino 2025.webp", image2: null, features: ["Multifuncional: úsalo como quieras", "Tejido suave y elástico", "Protección contra el viento y el frío", "Transpirable y de secado rápido", "Diseño exclusivo Alpino"] },
+                    { id: 13, name: "Licra Negra Alpino", price: "$132.000", available: true, isLycra: true, sortOrder: 41, image: "assets/images/Licra Negra - Frente.webp", image2: "assets/images/Licra Negra - Atras.webp", features: ["Badana de gel italiana", "Compresión muscular activa", "Costuras planas anti-roce", "Bandas elásticas de silicona", "Resistencia de hasta 7 horas en sillín"] },
                     { id: 14, name: "Cuellero Azul", price: "$16.000", available: true, sortOrder: 51, image: "assets/images/Cuellero Azul.webp", image2: null, features: ["Tejido suave y confortable", "Protección ligera para el cuello", "Versátil y fácil de llevar", "Ideal para el día a día", "Color sólido y combinable"] },
                     { id: 15, name: "Cuellero Reto las Civilizaciones", price: "$16.000", available: true, sortOrder: 1, image: "assets/images/cuellero 2026.webp", image2: null, features: ["Tejido suave y confortable", "Protección ligera para el cuello", "Versátil y fácil de llevar", "Ideal para el día a día", "Color sólido y combinable"] },
                     { id: 16, name: "Jersey Tricolor 2026", price: "$112.000", available: true, sortOrder: 2, image: "assets/images/TRICOLOR 2026 FRENTE.webp", image2: "assets/images/TRICOLOR 2026 ESPALDA.webp", features: ["Diseño conmemorativo", "Tejidos de última generación", "Ajuste de competición", "Detalles exclusivos de la colección", "Representa los colores de la bandera"] },
@@ -206,7 +208,7 @@
                     // --- Productos No Disponibles (Ordenados por ID para fácil edición) ---
                     { id: 11, name: "Jersey Azul Manga Larga", price: "$112.000", available: false, image: "assets/images/Jersey Alpino Azul (Frente) Manga Larga.webp", image2: "assets/images/Jersey Alpino Azul (Espalda) Manga Larga.webp", features: ["Protección solar UV 50+", "Secado ultra rápido", "Tres bolsillos traseros reforzados", "Laterales en malla transpirable", "Ideal para rutas de largo aliento"] },
                     { id: 12, name: "Jersey Negro Manga Larga", price: "$112.000", available: false, image: "assets/images/Jersey Alpino Negro (Frente) Manga Larga.webp", image2: "assets/images/Jersey Alpino Negro (Espalda) Manga Corta.webp", features: ["Protección solar UV 50+", "Secado ultra rápido", "Tres bolsillos traseros reforzados", "Laterales en malla transpirable", "Ideal para rutas de largo aliento"] },
-                    { id: 13, name: "Licra Negra Alpino", price: "$132.000", available: false, isLycra: true, image: "assets/images/Licra Negra - Frente.webp", image2: "assets/images/Licra Negra - Atras.webp", features: ["Badana de gel italiana", "Compresión muscular activa", "Costuras planas anti-roce", "Bandas elásticas de silicona", "Resistencia de hasta 7 horas en sillín"] }
+                    
                 ],
 
                 init() {
@@ -232,6 +234,21 @@
                     }
                     const price = this.lycraPrices[this.selectedSeamType][this.selectedHours];
                     this.selectedProduct.price = this.formatPrice(price);
+                    
+                    // Actualizar mensaje de WhatsApp con las opciones de licra
+                    this.updateWhatsappMessage();
+                },
+
+                updateWhatsappMessage() {
+                    if (this.selectedProduct.isLycra && this.selectedProduct.available) {
+                        const badanaLabel = this.selectedSeamType === 'con-costuras' ? 'Con Costuras' : 'Sin Costuras';
+                        const price = this.lycraPrices[this.selectedSeamType][this.selectedHours];
+                        const horasLabel = this.selectedHours === '10+' ? '10+ horas' : this.selectedHours + ' horas';
+                        
+                        this.whatsappMessage = `Hola! Me interesa: ${this.selectedProduct.name}\n\nDetalles:\n- Tipo de Badana: ${badanaLabel}\n- Duración: ${horasLabel}\n- Precio: ${this.formatPrice(price)}`;
+                    } else {
+                        this.whatsappMessage = `Hola! Me interesa: ${this.selectedProduct.name}`;
+                    }
                 },
 
                 openProduct(product) {
@@ -240,6 +257,8 @@
                         this.selectedSeamType = 'con-costuras';
                         this.selectedHours = '4';
                         this.updateLycraPrice();
+                    } else {
+                        this.updateWhatsappMessage();
                     }
                     this.isModalOpen = true;
                 }
