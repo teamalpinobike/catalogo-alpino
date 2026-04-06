@@ -1,5 +1,21 @@
 # Control de Versiones - Catálogo Aziru
 
+## v1.6 - 2026-03-05
+- **Refactorización de Datos (Separación de Lógica y Contenido):**
+    - Se migraron todos los datos de los productos desde el archivo `Index.html` a un archivo dedicado `products.json`.
+    - La aplicación ahora carga los productos de forma asíncrona usando `fetch`, haciendo el código principal más limpio y fácil de mantener.
+    - Los precios se estandarizaron a formato numérico en el JSON, y se formatean a moneda solo al mostrarlos en la interfaz.
+    - Las categorías de los filtros ahora se generan dinámicamente a partir de los datos en `products.json`, eliminando la necesidad de mantener una lista manual.
+- **Implementación de Guía de Tallas Interactiva:**
+    - Se añadió un nuevo filtro "Guía de Tallas" que muestra una sección dedicada.
+    - Esta sección contiene un carrusel (slider) con las imágenes de las tablas de medidas.
+    - Se implementaron botones de navegación (anterior/siguiente) para desplazarse por las diferentes guías de tallas.
+- **Mejora de Experiencia de Usuario (UX):**
+    - Se añadió la funcionalidad de **zoom** a las imágenes de la guía de tallas. Al hacer clic en una imagen del carrusel, esta se abre en un modal ampliado para una mejor visualización.
+    - Se mejoró la accesibilidad y el SEO añadiendo etiquetas `alt` dinámicas a todas las imágenes de los productos.
+    - El filtrado por categoría ahora es más robusto al comparar directamente la propiedad `category` del producto.
+
+
 ## v1.5 - 2026-03-03
 - **Mejoras de Diseño y Usabilidad:**
     - Se añadió un marco visible a las tarjetas de producto cambiando el color de fondo de la página para mejorar el contraste y la estética.
