@@ -78,7 +78,7 @@
                             <button @click="openProduct(product)" class="w-full py-3 text-xs font-bold text-gray-400 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all tracking-widest">
                                 DETALLES TÉCNICOS
                             </button>
-                            <a :href="'https://wa.me/573203208173?text=Hola! Me interesa: ' + product.name" target="_blank" class="flex items-center justify-center w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-lg active:scale-95">
+                            <a :href="'https://wa.me/573203208173?text=' + encodeURIComponent('Hola! Me interesa: ' + product.name)" target="_blank" class="flex items-center justify-center w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-lg active:scale-95">
                                 COMPRAR AHORA
                             </a>
                         </div>
@@ -137,13 +137,14 @@
             <img :src="zoomedImageSrc" alt="Guía de Tallas Ampliada" class="w-auto h-auto max-w-full max-h-[90vh] rounded-lg shadow-2xl">
         </div>
     </div>
-    <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 modal-overlay" @click="isModalOpen = false"></div>
-        <div x-show="isModalOpen" x-transition.scale.95 class="relative bg-white rounded-[2.5rem] overflow-hidden shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
-            <button @click="isModalOpen = false" class="absolute top-5 right-5 z-20 bg-white/80 backdrop-blur-md text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-white transition-colors">✕</button>
+    <template x-if="selectedProduct">
+        <div x-show="isModalOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 modal-overlay" @click="closeProduct()"></div>
+            <div x-show="isModalOpen" x-transition.scale.95 class="relative bg-white rounded-[2.5rem] overflow-hidden shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+            <button @click="closeProduct()" class="absolute top-5 right-5 z-20 bg-white/80 backdrop-blur-md text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-white transition-colors">✕</button>
             <div class="overflow-y-auto no-scrollbar">
                 <div class="relative bg-white pt-10 pb-4">
-                    <div class="snap-x no-scrollbar h-80">
+                    <div x-ref="productCarousel" x-effect="selectedProduct && ($el.scrollLeft = 0)" class="snap-x no-scrollbar h-80">
                         <div class="snap-center h-full p-6">
                             <img :src="selectedProduct.image" :alt="selectedProduct.name" class="w-full h-full object-contain">
                         </div>
@@ -206,6 +207,7 @@
             </div>
         </div>
     </div>
+</template>
 
     <script>
         window.shopApp = function() {
@@ -213,7 +215,7 @@
                 isModalOpen: false,
                 isSizeGuideModalOpen: false,
                 zoomedImageSrc: '',
-                selectedProduct: {},
+                selectedProduct: null,
                 products: [],
                 unavailableProducts: [],
                 categories: [],
@@ -256,6 +258,16 @@
                 },
 
                 updateLycraPrice() {
+                    if (!this.selectedProduct.available) {
+                        this.updateWhatsappMessage();
+                        return;
+                    }
+
+                    if (!this.selectedProduct.isLycra) {
+                        this.updateWhatsappMessage();
+                        return;
+                    }
+
                     if (this.selectedSeamType === 'sin-costuras' && this.selectedHours === '4') {
                         this.selectedHours = '6';
                     }
@@ -284,18 +296,35 @@
                 },
 
                 openProduct(product) {
-                    this.selectedProduct = JSON.parse(JSON.stringify(product));
-                    if (this.selectedProduct.isLycra && this.selectedProduct.available) {
-                        this.selectedSeamType = 'con-costuras';
-                        this.selectedHours = '4';
-                    }
-                    this.updateLycraPrice(); // Llama para establecer precio inicial y mensaje
-                    this.isModalOpen = true;
-                }
-                ,
+                    this.selectedProduct = null;
+                    this.isModalOpen = false;
+                    this.selectedSeamType = 'con-costuras';
+                    this.selectedHours = '4';
+
+                    this.$nextTick(() => {
+                        this.selectedProduct = JSON.parse(JSON.stringify(product));
+                        if (this.selectedProduct.isLycra && this.selectedProduct.available) {
+                            this.updateLycraPrice();
+                        } else {
+                            this.updateWhatsappMessage();
+                        }
+                        this.isModalOpen = true;
+
+                        const carousel = this.$refs.productCarousel;
+                        if (carousel) {
+                            carousel.scrollLeft = 0;
+                            carousel.scrollTop = 0;
+                        }
+                    });
+                },
                 openSizeGuideModal(src) {
                     this.zoomedImageSrc = src;
                     this.isSizeGuideModalOpen = true;
+                },
+
+                closeProduct() {
+                    this.isModalOpen = false;
+                    this.selectedProduct = null;
                 }
             }
         };
