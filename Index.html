@@ -39,6 +39,12 @@
                     class="px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm">
                 Todos
             </button>
+
+            <button @click="selectedCategory = 'Colección 2026'"
+                    :class="{ 'bg-gray-900 text-white': selectedCategory === 'Colección 2026', 'bg-white text-gray-600 hover:bg-gray-100': selectedCategory !== 'Colección 2026' }"
+                    class="px-5 py-2 rounded-full text-sm font-bold transition-all shadow-sm">
+                Colección 2026
+            </button>
             <template x-for="category in categories" :key="category">
                 <button @click="selectedCategory = category"
                         :class="{ 'bg-gray-900 text-white': selectedCategory === category, 'bg-white text-gray-600 hover:bg-gray-100': selectedCategory !== category }"
@@ -57,7 +63,7 @@
         <div x-show="selectedCategory !== 'Guía de Tallas'">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <template x-for="product in products.filter(p => selectedCategory === 'Todos' || p.category === selectedCategory)" :key="product.id">
+            <template x-for="product in products.filter(p => selectedCategory === 'Todos' || (selectedCategory === 'Colección 2026' ? p.isRecent : p.category === selectedCategory))" :key="product.id">
                 <div class="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 flex flex-col h-full overflow-hidden group p-3">
                     <div class="h-60 bg-white overflow-hidden cursor-pointer relative" @click="openProduct(product)">
                         <img :src="product.image" :alt="product.name" class="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-700">
@@ -66,6 +72,7 @@
                         <div class="mb-4 px-3">
                             <h3 class="text-xl font-extrabold text-gray-900 leading-tight mb-1" x-text="product.name"></h3>
                             <span class="text-indigo-600 font-black text-lg" x-text="formatPrice(product.price)"></span>
+                            <div x-show="product.purchaseNotice && product.category === 'Jersey' && product.available" class="text-sm text-indigo-600 font-semibold mt-1" x-text="product.purchaseNotice"></div>
                         </div>
                         <div class="mt-auto space-y-3">
                             <button @click="openProduct(product)" class="w-full py-3 text-xs font-bold text-gray-400 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all tracking-widest">
@@ -145,8 +152,13 @@
                                 <img :src="selectedProduct.image2" :alt="selectedProduct.name + ' (vista 2)'" class="w-full h-full object-contain">
                             </div>
                         </template>
+                            <template x-if="selectedProduct.image3">
+                                <div class="snap-center h-full p-6">
+                                    <img :src="selectedProduct.image3" :alt="selectedProduct.name + ' (vista 3)'" class="w-full h-full object-contain">
+                                </div>
+                            </template>
                     </div>
-                    <template x-if="selectedProduct.image2">
+                    <template x-if="selectedProduct.image2 || selectedProduct.image3">
                         <div class="text-center mt-2">
                             <span class="text-[10px] font-bold text-gray-300 tracking-[0.3em] uppercase">Desliza para ver más</span>
                         </div>
