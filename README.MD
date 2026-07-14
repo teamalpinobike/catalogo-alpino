@@ -1,5 +1,13 @@
 # Control de Versiones - Catálogo Aziru
 
+## v1.7 - 2026-07-14
+- **Actualización de Disponibilidad (Colección 2025):**
+    - Se marcaron todas las prendas de la colección 2025 como no disponibles (`available: false`) en `products.json`.
+    - Se removió el aviso temporal "Disponible para compra hasta el 30 de Junio" de las prendas correspondientes.
+- **Mejoras de Visualización de Precios:**
+    - Se aplicó la función de formato `formatPrice` en `Index.html` para que los precios de los productos no disponibles muestren el signo de pesos ($) y separación de miles.
+    - Se actualizó el modal de detalles para mostrar el precio formateado en lugar del texto estático "No Disponible".
+
 ## v1.6 - 2026-03-05
 - **Refactorización de Datos (Separación de Lógica y Contenido):**
     - Se migraron todos los datos de los productos desde el archivo `Index.html` a un archivo dedicado `products.json`.
