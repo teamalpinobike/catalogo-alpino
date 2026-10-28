@@ -1,4 +1,7 @@
 # Control de Versiones - Catálogo Aziru
+## v1.8 - 2026-10-28
+- **Actualizacion número de compras**
+    - Se actualizó el número de contacto de WhatsApp a `3232937476` en todos los botones de compra y consulta.
 
 ## v1.7 - 2026-07-14
 - **Actualización de Disponibilidad (Colección 2025):**

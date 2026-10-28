@@ -78,7 +78,7 @@
                             <button @click="openProduct(product)" class="w-full py-3 text-xs font-bold text-gray-400 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition-all tracking-widest">
                                 DETALLES TÉCNICOS
                             </button>
-                            <a :href="'https://wa.me/573203208173?text=' + encodeURIComponent('Hola! Me interesa: ' + product.name)" target="_blank" class="flex items-center justify-center w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-lg active:scale-95">
+                            <a :href="'https://wa.me/573232937476?text=' + encodeURIComponent('Hola! Me interesa: ' + product.name)" target="_blank" class="flex items-center justify-center w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-lg active:scale-95">
                                 COMPRAR AHORA
                             </a>
                         </div>
@@ -197,7 +197,7 @@
                             </div>
                         </template>
                     </div>
-                    <a :href="'https://wa.me/573203208173?text=' + encodeURIComponent(whatsappMessage)" target="_blank" x-show="selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-[#25D366] text-white rounded-[1.5rem] font-bold text-lg hover:bg-[#128C7E] shadow-xl transition-all active:scale-95 mb-4">
+                    <a :href="'https://wa.me/573232937476?text=' + encodeURIComponent(whatsappMessage)" target="_blank" x-show="selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-[#25D366] text-white rounded-[1.5rem] font-bold text-lg hover:bg-[#128C7E] shadow-xl transition-all active:scale-95 mb-4">
                         Consultar Disponibilidad
                     </a>
                     <button disabled x-show="!selectedProduct.available" class="flex items-center justify-center w-full py-5 bg-gray-300 text-gray-500 rounded-[1.5rem] font-bold text-lg cursor-not-allowed mb-4">
